@@ -1284,13 +1284,13 @@ Set_iptables(){
 	fi
 }
 Update_Shell(){
-	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/ToyoDAdoubi/doubi/master/mtproxy_go.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
+	sh_new_ver=$(wget --no-check-certificate -qO- -t1 -T3 "https://raw.githubusercontent.com/anerus/shadowsocks_bash/master/ssmt.sh"|grep 'sh_ver="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1) && sh_new_type="github"
 	[[ -z ${sh_new_ver} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
 	if [[ -e "/etc/init.d/mtproxy-go" ]]; then
 		rm -rf /etc/init.d/mtproxy-go
 		Service
 	fi
-	wget -N --no-check-certificate "https://raw.githubusercontent.com/ToyoDAdoubi/doubi/master/mtproxy_go.sh" && chmod +x mtproxy_go.sh
+	wget -N --no-check-certificate "https://raw.githubusercontent.com/anerus/shadowsocks_bash/master/ssmt.sh" && chmod +x ssmt.sh
 	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 }
 #起始部分
@@ -1325,6 +1325,8 @@ if [ $EUID -eq 0 ]; then
 	echo "16.查看 账号信息"
 	echo "17.查看 日志信息"
 	echo "18.查看 链接信息"
+	echo "----------------------------------"
+	echo "19.更新脚本（测试）"
 	echo "=================================="
         echo "shadowsocks状态"
 		check_shadowsocks_status
@@ -1361,7 +1363,7 @@ if [ $EUID -eq 0 ]; then
             [[ -z ${choice} ]] && choice="0"
             expr ${choice} + 1 > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                if [ ${choice} -ge 1 ] && [ ${choice} -le 18 ]; then
+                if [ ${choice} -ge 1 ] && [ ${choice} -le 19 ]; then
                     if [ "${choice}" == "1" ]; then
                         install_main
                     elif [ "${choice}" == "2" ]; then
@@ -1397,14 +1399,16 @@ if [ $EUID -eq 0 ]; then
                     elif [ "${choice}" == "17" ]; then
                         View_Log
                     elif [ "${choice}" == "18" ]; then
-                        View_user_connection_info						
+                        View_user_connection_info
+		    elif [ "${choice}" == "19" ]; then
+                        View_user_connection_info
                     fi
                     break
                 else
-                    echo -e "${red}[错误]${plain} 请输入 1 和 18 之间的数字！"
+                    echo -e "${red}[错误]${plain} 请输入 1 和 19 之间的数字！"
                 fi
             else
-                echo -e "${red}[错误]${plain} 请输入 1 和 18 之间的数字！"
+                echo -e "${red}[错误]${plain} 请输入 1 和 19 之间的数字！"
             fi
         done
     else
