@@ -1316,6 +1316,7 @@ Update_Shell(){
 	echo -e "脚本已更新为最新版本[ ${sh_new_ver} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
 }
 #起始部分
+check_sys
 if [ $EUID -eq 0 ]; then
     if check_release centos || check_release debian || check_release ubuntu; then
         clear
