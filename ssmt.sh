@@ -1317,11 +1317,6 @@ Update_Shell(){
 }
 #起始部分
 check_sys
-action=$1
-if [[ "${action}" == "monitor" ]]; then
-	crontab_monitor
-elif [[ "${action}" == "monitorip" ]]; then
-	crontab_monitorip
 if [ $EUID -eq 0 ]; then
     if check_release centos || check_release debian || check_release ubuntu; then
         clear
