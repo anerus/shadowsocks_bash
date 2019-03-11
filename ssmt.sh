@@ -1,8 +1,6 @@
-
 #! /usr/bin/env bash
 PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin"
 export PATH
-
 #ss脚本作者
 #托管：https://github.com/uxh/shadowsocks_bash
 #作者：https://www.banwagongzw.com & https://www.vultrcn.com
@@ -45,6 +43,7 @@ mbedtlsurl="https://tls.mbed.org/download/mbedtls-2.16.0-gpl.tgz"
 shadowsocksver="shadowsocks-libev-3.2.4"
 shadowsocksurl="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v3.2.4/shadowsocks-libev-3.2.4.tar.gz"
 initscripturl="https://raw.githubusercontent.com/uxh/shadowsocks_bash/master/shadowsocks-libev"
+ss_conf="/etc/shadowsocks-libev/config.json"
 
 #禁用 SElinux
 function disable_selinux() {
@@ -255,7 +254,47 @@ function set_shadowsocks_config() {
     echo "按回车键开始安装...或按 Ctrl+C 键取消"
     read -n 1
 }
-
+#功能 ss设置取值
+function get_ss_config(){
+[[ ! -e ${ss_conf} ]] && echo -e "${Error} SS 配置文件不存在 !" && exit 1
+	ssport=$(cat ${ss_conf}|grep '"server_port":'|awk -F '"server_port":' '{print $NF}')
+	ssport=${ssport%?}
+	server_value=$(cat ${ss_conf}|grep '"server":'|awk -F '"server":' '{print $NF}')
+	server_value=${server_value%?}
+	sspassword=$(cat ${ss_conf}|grep '"password":"'|awk -F '"password":"' '{print $NF}')
+	sspassword=${sspassword%?}
+	sspassword=${sspassword%?}
+	sscipher=$(cat ${ss_conf}|grep '"method":"'|awk -F '"method":"' '{print $NF}')
+	sscipher=${sscipher%?}
+	sscipher=${sscipher%?}
+	fast_open=$(cat ${ss_conf}|grep '"fast_open":'|awk -F '"fast_open":' '{print $NF}')
+	fast_open=${fast_open%?}
+}
+#功能 更换ss端口取值
+function change_ss_port(){
+echo "当前端口为 ${ssport}"
+echo "请设置 Shadowsocks 连接端口（1~65535）"
+    while true
+    do
+        read -p "[请输入（默认为6666）]：" ssport
+        if [ -z ${ssport} ]; then
+            ssport=6666
+        fi
+        expr ${ssport} + 1 > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            if [ ${ssport} -ge 1 ] && [ ${ssport} -le 65535 ]; then
+                echo "-------------------------------"
+                echo "连接端口已设置为：${ssport}"
+                echo "-------------------------------"
+                break
+            else
+                echo -e "${red}[错误]${plain} 请输入 1 和 65535 之间的数字！"
+            fi
+        else
+            echo -e "${red}[错误]${plain} 请输入 1 和 65535 之间的数字！"
+        fi
+    done
+}
 #安装依赖
 function install_dependencies() {
     if check_release centos; then
@@ -558,7 +597,6 @@ start_main() {
         echo -e "${red}[错误]${plain} Shadowsocks 启动失败，请稍后重试！"
     fi
 }
-
 #功能部分五
 stop_main() {
     /etc/init.d/shadowsocks stop
@@ -597,6 +635,35 @@ modify_main() {
     install_success
     echo ""
     echo "若修改后无法生效，请尝试重启解决！"
+}
+#功能部分九
+modify_ssport_main(){
+	get_ss_config
+	get_ipv4
+	local ssurl=$(echo -n "${sscipher}:${sspassword}@$(get_ipv4):${ssport}" | base64 -w0)
+	cat > /root/shadowsocks.txt << EOF
+===============================================
+服务器地址  : $(get_ipv4)
+服务端口    : ${ssport}
+连接密码    : ${sspassword}
+加密方式    : ${sscipher}
+-----------------------------------------------
+ss://${ssurl}
+===============================================
+EOF
+	echo -e "${green}[提示]${plain} 当前 Shadowsocks 配置信息为"
+	cat /root/shadowsocks.txt
+	change_ss_port
+	check_ipv6
+	check_kernel_headers
+	check_kernel_version
+	/etc/init.d/shadowsocks stop
+    set_firewall
+	config_shadowsocks
+	/etc/init.d/shadowsocks start
+	install_success
+    echo ""
+    echo "端口修改成功 若修改后无法生效，请尝试重启解决！"
 }
 #mtproxy部分
 sh_ver="1.0.1"
@@ -1311,24 +1378,25 @@ if [ $EUID -eq 0 ]; then
         echo "----------------------------------"
         echo " 7.查看 Shadowsocks 配置"
         echo " 8.修改 Shadowsocks 配置"
+		echo " 9.修改 SS 端口配置"
         echo "=================================="
-	echo " mtproxy 一键管理脚本（go）"
-	echo "=================================="
-	echo " 9.安装 MTProxy"
-	echo "10.更新 MTProxy"
-	echo "11.卸载 MTProxy"
-	echo "----------------------------------"
-	echo "12.启动 MTProxy"
-	echo "13.停止 MTProxy"
-	echo "14.重启 MTProxy"
-	echo "----------------------------------"
-	echo "15.设置 账号配置"
-	echo "16.查看 账号信息"
-	echo "17.查看 日志信息"
-	echo "18.查看 链接信息"
-	echo "----------------------------------"
-	echo "19.更新脚本（测试）"
-	echo "=================================="
+		echo " mtproxy 一键管理脚本（go）"
+		echo "=================================="
+		echo "10.安装 MTProxy"
+		echo "11.更新 MTProxy"
+		echo "12.卸载 MTProxy"
+		echo "----------------------------------"
+		echo "13.启动 MTProxy"
+		echo "14.停止 MTProxy"
+		echo "15.重启 MTProxy"
+		echo "----------------------------------"
+		echo "16.设置 账号配置"
+		echo "17.查看 账号信息"
+		echo "18.查看 日志信息"
+		echo "19.查看 链接信息"
+		echo "----------------------------------"
+		echo "20.更新脚本（测试）"
+		echo "=================================="
         echo "shadowsocks状态"
 		check_shadowsocks_status
         if [[ ${installedornot} == "installed" ]]; then
@@ -1364,7 +1432,7 @@ if [ $EUID -eq 0 ]; then
             [[ -z ${choice} ]] && choice="0"
             expr ${choice} + 1 > /dev/null 2>&1
             if [ $? -eq 0 ]; then
-                if [ ${choice} -ge 1 ] && [ ${choice} -le 19 ]; then
+                if [ ${choice} -ge 1 ] && [ ${choice} -le 20 ]; then
                     if [ "${choice}" == "1" ]; then
                         install_main
                     elif [ "${choice}" == "2" ]; then
@@ -1379,29 +1447,31 @@ if [ $EUID -eq 0 ]; then
                         restart_main
                     elif [ "${choice}" == "7" ]; then
                         status_main
-                    elif [ "${choice}" == "8" ]; then
+					elif [ "${choice}" == "8" ]; then
                         modify_main
                     elif [ "${choice}" == "9" ]; then
-                        Install
+                        modify_ssport_main
                     elif [ "${choice}" == "10" ]; then
-                        Update
+                        Install
                     elif [ "${choice}" == "11" ]; then
-                        Uninstall
+                        Update
                     elif [ "${choice}" == "12" ]; then
-                        Start
+                        Uninstall
                     elif [ "${choice}" == "13" ]; then
-                        Stop
+                        Start
                     elif [ "${choice}" == "14" ]; then
-                        Restart
+                        Stop
                     elif [ "${choice}" == "15" ]; then
-                        Set
+                        Restart
                     elif [ "${choice}" == "16" ]; then
-                        View
+                        Set
                     elif [ "${choice}" == "17" ]; then
-                        View_Log
+                        View
                     elif [ "${choice}" == "18" ]; then
+                        View_Log
+                    elif [ "${choice}" == "19" ]; then
                         View_user_connection_info
-		    elif [ "${choice}" == "19" ]; then
+					elif [ "${choice}" == "20" ]; then
                         Update_Shell
                     fi
                     break
