@@ -1402,7 +1402,7 @@ if [ $EUID -eq 0 ]; then
                     elif [ "${choice}" == "18" ]; then
                         View_user_connection_info
 		    elif [ "${choice}" == "19" ]; then
-                        View_user_connection_info
+                        Update_Shell
                     fi
                     break
                 else
