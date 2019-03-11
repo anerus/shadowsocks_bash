@@ -3,9 +3,18 @@
 PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin"
 export PATH
 
+#ss脚本作者
 #托管：https://github.com/uxh/shadowsocks_bash
 #作者：https://www.banwagongzw.com & https://www.vultrcn.com
 #致谢：https://teddysun.com
+#=================================================
+#	mtproxy脚本作者
+#	System Required: CentOS/Debian/Ubuntu
+#	Description: MTProxy Golang
+#	Version: 1.0.1
+#	Author: Toyo
+#	Blog: https://doub.io/shell-jc9/
+#=================================================
 
 #设置输出颜色
 red="\033[0;31m"
