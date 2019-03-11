@@ -1271,28 +1271,6 @@ Save_iptables(){
 	fi
 }
 Set_iptables(){
-	local release="none"
-   	if [ -f /etc/redhat-release ]; then
-       	 	release="centos"
-   	elif grep -qi "centos|red hat|redhat" /etc/issue; then
-       		release="centos"
-   	elif grep -qi "debian|raspbian" /etc/issue; then
-        	release="debian"
-    	elif grep -qi "ubuntu" /etc/issue; then
-        	release="ubuntu"
-    	elif grep -qi "centos|red hat|redhat" /proc/version; then
-        	release="centos"
-    	elif grep -qi "debian" /proc/version; then
-        	release="debian"
-    	elif grep -qi "ubuntu" /proc/version; then
-        	release="ubuntu"
-   	elif grep -qi "centos|red hat|redhat" /etc/*-release; then
-        	release="centos"
-    	elif grep -qi "debian" /etc/*-release; then
-        	release="debian"
-    	elif grep -qi "ubuntu" /etc/*-release; then
-        	release="ubuntu"
-    	fi
 	if [[ ${release} == "centos" ]]; then
 		service iptables save
 		service ip6tables save
