@@ -258,17 +258,15 @@ function set_shadowsocks_config() {
 function get_ss_config(){
 [[ ! -e ${ss_conf} ]] && echo -e "${Error} SS 配置文件不存在 !" && exit 1
 	ssport=$(cat ${ss_conf}|grep '"server_port":'|awk -F '"server_port":' '{print $NF}')
-	ssport=${ssport%?}
+	ssport=${ssport%\,*}
 	server_value=$(cat ${ss_conf}|grep '"server":'|awk -F '"server":' '{print $NF}')
-	server_value=${server_value%?}
+	server_value=${server_value%\,*}
 	sspassword=$(cat ${ss_conf}|grep '"password":"'|awk -F '"password":"' '{print $NF}')
-	sspassword=${sspassword%?}
-	sspassword=${sspassword%?}
+	sspassword=${sspassword%\"*}
 	sscipher=$(cat ${ss_conf}|grep '"method":"'|awk -F '"method":"' '{print $NF}')
-	sscipher=${sscipher%?}
-	sscipher=${sscipher%?}
+	sscipher=${sscipher%\"*}
 	fast_open=$(cat ${ss_conf}|grep '"fast_open":'|awk -F '"fast_open":' '{print $NF}')
-	fast_open=${fast_open%?}
+	fast_open=${fast_open%\,*}
 }
 #功能 更换ss端口取值
 function change_ss_port(){
